@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دليل الطالب العراقي</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#14272b;--mute:#5b6b6e;--line:#d9dfdc;--pri:#0f4c5c;--acc:#c98a00;--ok:#1b7a43;--warn:#a65d00}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1a1d;--card:#15262a;--ink:#e8efee;--mute:#9db0b2;--line:#27393d;--pri:#5fb6c9;--acc:#e8b43a;--ok:#5ccf8b;--warn:#f0a53a}}
+:root[data-theme=dark]{--bg:#0e1a1d;--card:#15262a;--ink:#e8efee;--mute:#9db0b2;--line:#27393d;--pri:#5fb6c9;--acc:#e8b43a;--ok:#5ccf8b;--warn:#f0a53a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 Tajawal,Tahoma,sans-serif;padding-bottom:env(safe-area-inset-bottom,0)}
+header{background:var(--pri);color:#fff;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 22px}
+.in,main{max-width:860px;margin:auto}
+h1{margin:0;font-size:27px;font-weight:800}header p{margin:4px 0 0;font-size:14px;opacity:.92}
+main{padding:14px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+input,select,button{font:inherit;color:inherit}
+input,select{flex:1;min-width:120px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+#q{font-size:18px;padding:13px;width:100%}
+button,.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:9px 15px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-block;font-size:15px}
+.alt{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.hit{border-bottom:1px solid var(--line);padding:12px 0}.hit:last-child{border:0}
+.meta{font-size:13px;color:var(--mute)}
+.ln{white-space:pre-wrap;background:var(--bg);border-inline-start:4px solid var(--acc);padding:8px 10px;border-radius:6px;margin:6px 0;font-size:15px;overflow-wrap:anywhere}
+.tag{font-size:12px;padding:0 8px;border:1px solid currentColor;border-radius:99px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+canvas{max-width:100%;height:auto;border:1px solid var(--line);margin-top:8px;background:#fff}
+.small{font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header><div class="in"><h1>دليل الطالب العراقي</h1>
+<p>البحث داخل ثلاثة أدلة رسمية فقط. كل نتيجة تُعرض مع اسم الدليل وسنته ورقم صفحته وصفحة الـPDF الأصلية.</p></div></header>
+<main>
+<section class="box">
+<input id="q" type="text" placeholder="مثال: طب الأسنان، علوم الحاسوب، الصيدلة" aria-label="بحث">
+<div class="row">
+<select id="src" aria-label="الدليل"><option value="">كل الأدلة الثلاثة</option>
+<option value="gov">الحكومي 2025-2026</option><option value="private">الأهلي 2026</option><option value="basra">أهل البصرة 2026-2027</option></select>
+<button id="go">ابحث</button><button id="th" class="alt" type="button">فاتح/داكن</button></div>
+<p class="small">البحث يتسامح مع الحروف الناقصة أو المبدّلة الناتجة عن استخراج النص من الـPDF، فتظهر بعض النتائج بوسم «تقريبية». افتح الصفحة الأصلية للتأكد قبل اعتماد أي رقم.</p>
+</section>
+<section class="box" id="st" hidden></section>
+<section class="box" id="res" hidden></section>
+<section class="box">
+<b>تصفح صفحة بعينها</b>
+<div class="row"><select id="bs" aria-label="الدليل"><option value="gov">الحكومي 2025-2026 (110 صفحة)</option><option value="private">الأهلي 2026 (118)</option><option value="basra">أهل البصرة 2026-2027 (140)</option></select>
+<input id="bp" type="number" min="1" placeholder="رقم الصفحة"><button id="bg" class="alt">اعرض</button></div>
+<div id="bv"></div>
+</section>
+<section class="box small">مصادر هذا الموقع: ثلاثة ملفات PDF داخل المستودع، لا غير. لا يجلب الموقع شيئاً من الإنترنت ولا يُدخل معلومات من خارجها. تواريخ الأدلة هي ما كُتب على ملفاتها، ولم يُتحقق من وجود نسخ أحدث. معدلك لا يُستخدم هنا، ولا يوجد ضمان قبول.</section>
+</main>
+<script>
+"use strict";
+const DOCS={gov:{t:"الدليل الحكومي",y:"2025-2026"},private:{t:"دليل الجامعات الأهلية",y:"2026"},basra:{t:"دليل شبكة أهل البصرة",y:"2026-2027"}};
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const norm=s=>(s||"").replace(/[\u064B-\u065F\u0640\u202a-\u202e\u200e\u200f]/g,"").replace(/[إأآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).toLowerCase();
+const sq=s=>norm(s).replace(/[\s|,،.\-:()\/]/g,"");
+const STOP=new Set("شنو اريد شكد كم هل ما ماهي الي اللي الذي التي في من الى على عن مع او بين هذا هذه يقبل تقبل بالجامعات الجامعات قسم اقسام كليه معدلي".split(" "));
+let DATA=null;
+$("th").onclick=()=>{const d=document.documentElement;d.dataset.theme=getComputedStyle(d).getPropertyValue("--bg").trim()==="#0e1a1d"?"light":"dark"};
+
+async function load(){
+ if(DATA)return DATA;
+ $("st").hidden=false;$("st").textContent="جارٍ تحميل نصوص الأدلة الثلاثة…";
+ try{
+  const out={};
+  await Promise.all(Object.keys(DOCS).map(async k=>{
+   const r=await fetch(`data/${k}.json`);if(!r.ok)throw new Error(k+" HTTP "+r.status);
+   const d=await r.json();d.lines=d.pages.map(p=>p.split("\n"));d.sq=d.lines.map(ls=>ls.map(sq));out[k]=d}));
+  DATA=out;$("st").hidden=true;return DATA;
+ }catch(e){$("st").innerHTML=`<b class="warn">تعذّر تحميل البيانات (${esc(e.message)}).</b> الموقع يحتاج أن يُفتح من GitHub Pages أو من خادم، لا من الملف مباشرة.`;throw e}
+}
+function variants(w){
+ const v=new Set([w]);
+ if(w.length>=4){for(let i=0;i<w.length;i++)v.add(w.slice(0,i)+w.slice(i+1));}
+ [["لج","جل"],["لم","مل"],["له","هل"],["لح","حل"],["لخ","خل"]].forEach(([a,b])=>{if(w.includes(a))v.add(w.replace(a,b))});
+ if(w.includes("ت"))v.add(w.replace("ت","خل"));
+ if(w.startsWith("ت"))v.add("خل"+w.slice(1));
+ return [...v];
+}
+function keywords(raw){
+ return norm(raw).replace(/[^\u0600-\u06FFa-z0-9\s]/g," ").split(/\s+/).filter(w=>w.length>=2&&!STOP.has(w)).map(w=>w.replace(/^ال(?=.{3,})/,"")).slice(0,6);
+}
+function search(q,only){
+ const kws=keywords(q).map(w=>({w,v:variants(w)}));
+ if(!kws.length)return [];
+ const hits=[];
+ for(const [k,d] of Object.entries(DATA)){
+  if(only&&only!==k)continue;
+  d.sq.forEach((ls,pi)=>{
+   let last=-9;
+   ls.forEach((_,i)=>{
+    const win=(ls[i-1]||"")+ls[i]+(ls[i+1]||"");
+    let sc=0,approx=false;
+    for(const x of kws){if(win.includes(x.w))sc++;else if(x.v.some(t=>win.includes(t))){sc+=0.8;approx=true}}
+    if(sc>=Math.max(1,kws.length-(kws.length>2?1:0))&&sc>0){
+     if(i-last<=2&&hits.length&&hits[hits.length-1].k===k&&hits[hits.length-1].p===pi){if(sc>hits[hits.length-1].sc){hits.pop()}else return}
+     hits.push({k,p:pi,i,sc,approx});last=i}
+   });
+  });
+ }
+ return hits.sort((a,b)=>b.sc-a.sc||(a.approx-b.approx)).slice(0,40);
+}
+let pdfjs=null;
+function pdfLib(){
+ return pdfjs||(pdfjs=new Promise((res,rej)=>{
+  const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  s.onload=async()=>{try{const w=await(await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")).text();
+   pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([w],{type:"text/javascript"}));res(pdfjsLib)}catch(e){rej(e)}};
+  s.onerror=()=>rej(new Error("تعذر تحميل مكتبة PDF"));document.head.appendChild(s)}));
+}
+async function showPage(k,p,box){
+ box.innerHTML='<p class="small">جارٍ رسم الصفحة الأصلية…</p>';
+ try{
+  const lib=await pdfLib(),pdf=await lib.getDocument(`pdf/${k}.pdf`).promise,pg=await pdf.getPage(p);
+  const vp=pg.getViewport({scale:1.6}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;
+  await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;box.innerHTML="";box.appendChild(c);
+ }catch(e){box.innerHTML=`<p class="warn">تعذّر رسم الصفحة (${esc(e.message||"")}). <a href="pdf/${k}.pdf#page=${p}" target="_blank" rel="noopener">افتح الملف على الصفحة ${p}</a></p>`}
+}
+function addView(el,k,p){
+ const b=document.createElement("button");b.className="alt";b.textContent="اعرض الصفحة الأصلية";
+ const a=document.createElement("a");a.className="btn alt";a.href=`pdf/${k}.pdf#page=${p}`;a.target="_blank";a.rel="noopener";a.textContent="افتح الـPDF";a.style.marginInlineStart="6px";
+ const box=document.createElement("div");b.onclick=()=>{b.disabled=true;showPage(k,p,box)};el.append(b,a,box);
+}
+$("go").onclick=async()=>{
+ const q=$("q").value.trim();if(!q){$("q").focus();return}
+ try{await load()}catch{return}
+ const hs=search(q,$("src").value),res=$("res");res.hidden=false;res.innerHTML="";
+ const h=document.createElement("div");h.innerHTML=`<b>${hs.length?`${hs.length} نتيجة`:"لا توجد نتائج"}</b> <span class="small">· بحث ${new Date().toLocaleString("ar-IQ")} داخل الأدلة الثلاثة</span>`;res.appendChild(h);
+ if(!hs.length){const p=document.createElement("p");p.className="warn";p.textContent="لم يُعثر على المعلومة في الأدلة المحمّلة. هذا لا يعني أنها غير موجودة، جرّب كلمة أقصر أو اسماً مختلفاً.";res.appendChild(p)}
+ hs.forEach(x=>{
+  const d=DATA[x.k],ls=d.lines[x.p],el=document.createElement("div");el.className="hit";
+  const txt=ls.slice(Math.max(0,x.i-1),x.i+2).join("\n");
+  el.innerHTML=`<div class="meta">${DOCS[x.k].t} (${DOCS[x.k].y}) · صفحة ${x.p+1} · <span class="tag ${x.approx?"warn":"ok"}">${x.approx?"تقريبية":"مطابقة"}</span></div><div class="ln">${esc(txt)}</div>`;
+  addView(el,x.k,x.p+1);res.appendChild(el)});
+};
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()});
+$("bg").onclick=()=>{const p=+$("bp").value;if(p>0){$("bv").innerHTML="";const b=document.createElement("div");$("bv").appendChild(b);showPage($("bs").value,p,b)}};
+</script>
+</body>
+</html>

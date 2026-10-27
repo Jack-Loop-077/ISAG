@@ -71,7 +71,7 @@ async function load(){
  try{
   const out={};
   await Promise.all(Object.keys(DOCS).map(async k=>{
-   const r=await fetch(`data/${k}.json`);if(!r.ok)throw new Error(k+" HTTP "+r.status);
+   const r=await fetch(`${k}.json`);if(!r.ok)throw new Error(k+" HTTP "+r.status);
    const d=await r.json();d.lines=d.pages.map(p=>p.split("\n"));d.sq=d.lines.map(ls=>ls.map(sq));out[k]=d}));
   DATA=out;$("st").hidden=true;return DATA;
  }catch(e){$("st").innerHTML=`<b class="warn">تعذّر تحميل البيانات (${esc(e.message)}).</b> الموقع يحتاج أن يُفتح من GitHub Pages أو من خادم، لا من الملف مباشرة.`;throw e}
@@ -118,14 +118,14 @@ function pdfLib(){
 async function showPage(k,p,box){
  box.innerHTML='<p class="small">جارٍ رسم الصفحة الأصلية…</p>';
  try{
-  const lib=await pdfLib(),pdf=await lib.getDocument(`pdf/${k}.pdf`).promise,pg=await pdf.getPage(p);
+  const lib=await pdfLib(),pdf=await lib.getDocument(`${k}.pdf`).promise,pg=await pdf.getPage(p);
   const vp=pg.getViewport({scale:1.6}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;
   await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;box.innerHTML="";box.appendChild(c);
- }catch(e){box.innerHTML=`<p class="warn">تعذّر رسم الصفحة (${esc(e.message||"")}). <a href="pdf/${k}.pdf#page=${p}" target="_blank" rel="noopener">افتح الملف على الصفحة ${p}</a></p>`}
+ }catch(e){box.innerHTML=`<p class="warn">تعذّر رسم الصفحة (${esc(e.message||"")}). <a href="${k}.pdf#page=${p}" target="_blank" rel="noopener">افتح الملف على الصفحة ${p}</a></p>`}
 }
 function addView(el,k,p){
  const b=document.createElement("button");b.className="alt";b.textContent="اعرض الصفحة الأصلية";
- const a=document.createElement("a");a.className="btn alt";a.href=`pdf/${k}.pdf#page=${p}`;a.target="_blank";a.rel="noopener";a.textContent="افتح الـPDF";a.style.marginInlineStart="6px";
+ const a=document.createElement("a");a.className="btn alt";a.href=`${k}.pdf#page=${p}`;a.target="_blank";a.rel="noopener";a.textContent="افتح الـPDF";a.style.marginInlineStart="6px";
  const box=document.createElement("div");b.onclick=()=>{b.disabled=true;showPage(k,p,box)};el.append(b,a,box);
 }
 $("go").onclick=async()=>{
